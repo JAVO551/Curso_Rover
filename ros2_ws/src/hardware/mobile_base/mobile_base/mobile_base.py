@@ -37,8 +37,8 @@ class MobileBaseNode(Node):
         
         #Configuration needed for 3 roboclaws:
         self.ADDRESS = 0x80 #Adress to send instructions to the roboclaw
-        self.roboclaw_front = roboclaw_3.Roboclaw("/dev/ttyACM2", 115200) #Create the roboclaw object with the device of the rare roboclaw
-        self.roboclaw_center = roboclaw_3.Roboclaw("/dev/ttyACM1", 115200) #Create the roboclaw object with the device of the center roboclaw
+        self.roboclaw_front = roboclaw_3.Roboclaw("/dev/ttyACM1", 115200) #Create the roboclaw object with the device of the rare roboclaw
+        #self.roboclaw_center = roboclaw_3.Roboclaw("/dev/ttyACM1", 115200) #Create the roboclaw object with the device of the center roboclaw
         self.roboclaw_rear = roboclaw_3.Roboclaw("/dev/ttyACM0", 115200) #Create the roboclaw object with the device of the frontal roboclaw
         
         #Open comunication with the 3 roboclaws
@@ -46,10 +46,7 @@ class MobileBaseNode(Node):
         if not self.roboclaw_front.Open():
             self.get_logger().fatal("Failed to open the front roboclaw")
             return
-        self.roboclaw_center.Open()
-        if not self.roboclaw_center.Open():
-            self.get_logger().fatal("Failed to open the center roboclaw")
-            return
+        
         self.roboclaw_rear.Open()
         if not self.roboclaw_rear.Open():
             self.get_logger().fatal("Failed to open the rear roboclaw")
@@ -93,8 +90,7 @@ class MobileBaseNode(Node):
 
         self.roboclaw_front.SetM1VelocityPID(self.ADDRESS,self.k_p,self.k_i,self.k_d,self.qpps)
         self.roboclaw_front.SetM2VelocityPID(self.ADDRESS,self.k_p,self.k_i,self.k_d,self.qpps)
-        self.roboclaw_center.SetM1VelocityPID(self.ADDRESS,self.k_p_center,self.k_i_center,self.k_d_center,self.qpps)
-        self.roboclaw_center.SetM2VelocityPID(self.ADDRESS,self.k_p_center,self.k_i_center,self.k_d_center,self.qpps)
+        
         self.roboclaw_rear.SetM1VelocityPID(self.ADDRESS,self.k_p,self.k_i,self.k_d,self.qpps)
         self.roboclaw_rear.SetM2VelocityPID(self.ADDRESS,self.k_p,self.k_i,self.k_d,self.qpps)
         
@@ -149,14 +145,13 @@ class MobileBaseNode(Node):
 
         #Set values of roboclaws to 0
         self.roboclaw_front.ResetEncoders(self.ADDRESS)
-        self.roboclaw_center.ResetEncoders(self.ADDRESS)
+        
         self.roboclaw_rear.ResetEncoders(self.ADDRESS)
 
         #Get a first measure of 6 encoders in the robot start
         self.prev_enc1_front = self.roboclaw_front.ReadEncM1(self.ADDRESS) [1]
         self.prev_enc2_front = self.roboclaw_front.ReadEncM2(self.ADDRESS) [1]
-        self.prev_enc1_center = self.roboclaw_center.ReadEncM1(self.ADDRESS) [1]
-        self.prev_enc2_center = self.roboclaw_center.ReadEncM2(self.ADDRESS) [1]
+        
         self.prev_enc1_rear = self.roboclaw_rear.ReadEncM1(self.ADDRESS) [1]
         self.prev_enc2_rear = self.roboclaw_rear.ReadEncM2(self.ADDRESS) [1]
         
@@ -206,11 +201,11 @@ class MobileBaseNode(Node):
         #Wheels positions and speeds with dynamixels
         if self.angular > 0.005 or self.angular < -0.005: #Poner un umbral
 
-            if abs(self.linear/self.angular) < 0.4:
-                if self. linear != 0:
-                    self.linear = (0.5/abs(self.angular)) * self.linear/abs(self.linear)
-                else:
-                    self.linear = (0.5/self.angular)
+            # if abs(self.linear/self.angular) < 0.4:
+            #     if self. linear != 0:
+            #         self.linear = (0.5/abs(self.angular)) * self.linear/abs(self.linear)
+            #     else:
+            #         self.linear = (0.5/self.angular)
 
             
             wheel_information = self.get_wheel_configuration (self.linear,self.angular)   
@@ -259,38 +254,40 @@ class MobileBaseNode(Node):
 
         #Printing speeds using roboclaws
 
-        self.roboclaw_front.SpeedAccelM1(self.ADDRESS,self.accel_max,int(round(wheel_speeds[0])))
-        #self.roboclaw_center.SpeedAccelM1(self.ADDRESS,self.accel_max,int(round(wheel_speeds[1]))) 
-        self.roboclaw_rear.SpeedAccelM1(self.ADDRESS,self.accel_max,int(round(wheel_speeds[2])))
-        #self.roboclaw_front.SpeedAccelM2(self.ADDRESS,self.accel_max,int(round(wheel_speeds[3])))
-        self.roboclaw_center.SpeedAccelM2(self.ADDRESS,self.accel_max,int(round(wheel_speeds[4])))
-        self.roboclaw_rear.SpeedAccelM2(self.ADDRESS,self.accel_max,int(round(wheel_speeds[5])))
+        # self.roboclaw_front.SpeedAccelM1(self.ADDRESS,self.accel_max,int(round(wheel_speeds[0])))
+        # #self.roboclaw_center.SpeedAccelM1(self.ADDRESS,self.accel_max,int(round(wheel_speeds[1]))) 
+        # self.roboclaw_rear.SpeedAccelM1(self.ADDRESS,self.accel_max,int(round(wheel_speeds[2])))
+        # #self.roboclaw_front.SpeedAccelM2(self.ADDRESS,self.accel_max,int(round(wheel_speeds[3])))
+        # #self.roboclaw_center.SpeedAccelM2(self.ADDRESS,self.accel_max,int(round(wheel_speeds[4])))
+        # self.roboclaw_rear.SpeedAccelM2(self.ADDRESS,self.accel_max,int(round(wheel_speeds[5])))
         
-        # if wheel_speeds[0] > 0: #Provisional until we solve encoder left center problem
-
-        #     self.roboclaw_center.ForwardM1(self.ADDRESS, min(int(round(wheel_speeds[0]*self.max_pwm*self.meters_per_tick)),127))
-        # else:
-        #     self.roboclaw_center.BackwardM1(self.ADDRESS, min(int(round(abs(wheel_speeds[0])*self.max_pwm*self.meters_per_tick)),127))
-        if wheel_speeds[1] > 0: #Provisional until we solve encoder left center problem
-            self.roboclaw_center.ForwardM1(self.ADDRESS, min(int(round(wheel_speeds[1]*self.max_pwm*self.meters_per_tick)),127))
+        if wheel_speeds[0] > 0: 
+            self.roboclaw_front.ForwardM1(self.ADDRESS, min(int(round(wheel_speeds[0]*self.max_pwm*self.meters_per_tick)),127))
         else:
-            self.roboclaw_center.BackwardM1(self.ADDRESS, min(int(round(abs(wheel_speeds[1])*self.max_pwm*self.meters_per_tick)),127))
-        # if wheel_speeds[2] > 0: #Provisional until we solve encoder left center problem
-        #     self.roboclaw_center.ForwardM1(self.ADDRESS, min(int(round(wheel_speeds[2]*self.max_pwm*self.meters_per_tick)),127))
-        # else:
-        #     self.roboclaw_center.BackwardM1(self.ADDRESS, min(int(round(abs(wheel_speeds[2])*self.max_pwm*self.meters_per_tick)),127))
-        if wheel_speeds[3] > 0: #Provisional until we solve encoder left center problem
+            self.roboclaw_front.BackwardM1(self.ADDRESS, min(int(round(abs(wheel_speeds[0])*self.max_pwm*self.meters_per_tick)),127))
+        
+        if wheel_speeds[2] > 0: 
+            self.roboclaw_rear.ForwardM1(self.ADDRESS, min(int(round(wheel_speeds[2]*self.max_pwm*self.meters_per_tick)),127))
+        else:
+            self.roboclaw_rear.BackwardM1(self.ADDRESS, min(int(round(abs(wheel_speeds[2])*self.max_pwm*self.meters_per_tick)),127))
+        if wheel_speeds[3] > 0: 
             self.roboclaw_front.ForwardM2(self.ADDRESS, min(int(round(wheel_speeds[3]*self.max_pwm*self.meters_per_tick)),127))
         else:
             self.roboclaw_front.BackwardM2(self.ADDRESS, min(int(round(abs(wheel_speeds[3])*self.max_pwm*self.meters_per_tick)),127))
-        # if wheel_speeds[4] > 0: #Provisional until we solve encoder left center problem
+        
+        if wheel_speeds[5] > 0: 
+            self.roboclaw_rear.ForwardM2(self.ADDRESS, min(int(round(wheel_speeds[5]*self.max_pwm*self.meters_per_tick)),127))
+        else:
+            self.roboclaw_rear.BackwardM2(self.ADDRESS, min(int(round(abs(wheel_speeds[5])*self.max_pwm*self.meters_per_tick)),127))
+
+        # if wheel_speeds[1] > 0: 
+        #     self.roboclaw_center.ForwardM1(self.ADDRESS, min(int(round(wheel_speeds[1]*self.max_pwm*self.meters_per_tick)),127))
+        # else:
+        #     self.roboclaw_center.BackwardM1(self.ADDRESS, min(int(round(abs(wheel_speeds[1])*self.max_pwm*self.meters_per_tick)),127))
+        # if wheel_speeds[4] > 0: 
         #     self.roboclaw_center.ForwardM1(self.ADDRESS, min(int(round(wheel_speeds[4]*self.max_pwm*self.meters_per_tick)),127))
         # else:
         #     self.roboclaw_center.BackwardM1(self.ADDRESS, min(int(round(abs(wheel_speeds[4])*self.max_pwm*self.meters_per_tick)),127))
-        # if wheel_speeds[5] > 0: #Provisional until we solve encoder left center problem
-        #     self.roboclaw_center.ForwardM1(self.ADDRESS, min(int(round(wheel_speeds[5]*self.max_pwm*self.meters_per_tick)),127))
-        # else:
-        #     self.roboclaw_center.BackwardM1(self.ADDRESS, min(int(round(abs(wheel_speeds[5])*self.max_pwm*self.meters_per_tick)),127))
         
         
        
@@ -342,7 +339,7 @@ class MobileBaseNode(Node):
         angles[0] = 2172 - (4096/(2*math.pi))* angles[0]
         angles[2] = 2048 - (4096/(2*math.pi))* angles[2]
         angles[3] = 2048 - (4096/(2*math.pi))* angles[3]
-        angles[5] = 2048 - (4096/(2*math.pi))* angles[5]
+        angles[5] = 2048 - (4096/(2*math.pi))* angles[5] #2048
 
         return angles
     
@@ -356,8 +353,7 @@ class MobileBaseNode(Node):
     def stop(self):
         self.roboclaw_front.ForwardM1(self.ADDRESS, 0)
         self.roboclaw_front.ForwardM2(self.ADDRESS, 0)
-        self.roboclaw_center.ForwardM1(self.ADDRESS, 0)
-        self.roboclaw_center.ForwardM2(self.ADDRESS, 0)
+        
         self.roboclaw_rear.ForwardM1(self.ADDRESS, 0)
         self.roboclaw_rear.ForwardM2(self.ADDRESS, 0)
 
@@ -374,8 +370,7 @@ class MobileBaseNode(Node):
         #Encoders 1 = left, Encoders 2 = right
         enc1_front = self.roboclaw_front.ReadEncM1(self.ADDRESS) [1]
         enc2_front = self.roboclaw_front.ReadEncM2(self.ADDRESS) [1]
-        enc1_center = self.roboclaw_center.ReadEncM1(self.ADDRESS) [1]
-        enc2_center = self.roboclaw_center.ReadEncM2(self.ADDRESS) [1]
+        
         enc1_rear = self.roboclaw_rear.ReadEncM1(self.ADDRESS) [1]
         enc2_rear = self.roboclaw_rear.ReadEncM2(self.ADDRESS) [1]
 
@@ -414,11 +409,11 @@ class MobileBaseNode(Node):
 
         #Use angle wheel, ppr and advance to calculate position advance in meters
         dx_front_left = (enc1_front - self.prev_enc1_front) * math.cos(self.servo_odometry_angles[0])*self.meters_per_tick
-        dx_center_left = (enc1_center - self.prev_enc1_center) * self.meters_per_tick 
+        #dx_center_left = (enc1_center - self.prev_enc1_center) * self.meters_per_tick 
         dx_rear_left = (enc1_rear - self.prev_enc1_rear) * math.cos(self.servo_odometry_angles[1])*self.meters_per_tick
         
         dx_front_right = (enc2_front - self.prev_enc2_front) * math.cos(self.servo_odometry_angles[2])*self.meters_per_tick
-        dx_center_right = (enc2_center - self.prev_enc2_center) * self.meters_per_tick 
+        #dx_center_right = (enc2_center - self.prev_enc2_center) * self.meters_per_tick 
         dx_rear_right = (enc2_rear - self.prev_enc2_rear) * math.cos(self.servo_odometry_angles[3])*self.meters_per_tick
 
         #Average value of right and left to imitate a differential robot
@@ -426,8 +421,8 @@ class MobileBaseNode(Node):
         # dx_right = dx_center_right
         # dx_left = dx_center_left
 
-        dx_right = (dx_center_right + dx_rear_right) / 2.0
-        dx_left = (dx_front_left + dx_rear_left) / 2.0
+        dx_right = dx_front_right
+        dx_left = dx_front_left
 
         #Default 16 milisegundos del delay del puerto,
         
@@ -435,8 +430,7 @@ class MobileBaseNode(Node):
         #Update old encoder value for the next iteration
         self.prev_enc1_front = enc1_front
         self.prev_enc2_front = enc2_front
-        self.prev_enc1_center = enc1_center
-        self.prev_enc2_center = enc2_center
+        
         self.prev_enc1_rear = enc1_rear
         self.prev_enc2_rear = enc2_rear
 
@@ -454,9 +448,10 @@ class MobileBaseNode(Node):
 
 
         #Split position in 2 axes and update total final odometry position
-        self.theta += d_theta
+        
         self.x += d_s * math.cos(self.theta)
         self.y += d_s * math.sin(self.theta)
+        self.theta += d_theta
 
         # self.theta = d_theta/2
         # self.x = self.x/2
@@ -479,7 +474,7 @@ class MobileBaseNode(Node):
         t.transform.rotation.w = math.cos(self.theta / 2.0)
 
         self.tf_broadcaster.sendTransform(t)
-        '''
+        
         # --- Publicar el tópico /odom ---
         odom_msg = Odometry()
         odom_msg.header.stamp = t.header.stamp
@@ -499,7 +494,7 @@ class MobileBaseNode(Node):
 
         self.get_logger().info(
              f"x={self.x:.4f} y={self.y:.4f} theta={self.theta:.4f}")
-        '''
+        
 
     def __del__(self):
         

@@ -54,21 +54,21 @@ class KeyboardSpeed(Node):
 
             elif key == "h" or key== "H":
                 self.current_linear_speed = 0.0
-                self.current_angular_speed = -5.0
+                self.current_angular_speed = -0.5
                 self.get_logger().info(f"Right_turn")
 
             elif key == "f" or key== "F":
                 self.current_linear_speed = 0.0
-                self.current_angular_speed = 5.0
+                self.current_angular_speed = 0.5
                 self.get_logger().info(f"Left_turn")
 
             elif key == "t" or key== "T":
-                self.current_linear_speed = 5.0
+                self.current_linear_speed = 0.5
                 self.current_angular_speed = 0.0
                 self.get_logger().info(f"Foward")
 
             elif key == "g" or key== "G":
-                self.current_linear_speed = -5.0
+                self.current_linear_speed = -0.5
                 self.current_angular_speed = 0.0
                 self.get_logger().info(f"Backward")
               
