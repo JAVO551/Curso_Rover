@@ -25,6 +25,9 @@ class ObjectiveMovementPWM(Node):
         self.get_logger().info("Nodo de distancia objectivo iniciado")
 
         self.move_forward(1.0)
+        self.move_forward(1.0)
+        self.move_forward(1.0)
+        self.move_forward(1.0)
         
 
     def move_forward (self, distance):
