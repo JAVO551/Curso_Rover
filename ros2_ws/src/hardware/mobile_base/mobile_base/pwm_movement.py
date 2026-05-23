@@ -24,10 +24,10 @@ class ObjectiveMovementPWM(Node):
         
         self.get_logger().info("Nodo de distancia objectivo iniciado")
 
-        self.move_forward(1.0)
-        self.move_forward(1.0)
-        self.move_forward(1.0)
-        self.move_forward(1.0)
+        #self.move_forward(1.0)
+        self.move_turn(1.57)           #Equivale 90| a Izq
+        # self.move_forward(1.0)
+        # self.move_forward(1.0)
         
 
     def move_forward (self, distance):
@@ -52,21 +52,22 @@ class ObjectiveMovementPWM(Node):
 
     def move_turn (self, angle): 
                 msg = Twist() 
-                self.move_time = (abs(angle) * self.radius_turn / self.rover_speed) 
+                self.move_time = (abs(angle) / self.rover_speed) 
                 self.pulses= self.move_time/self.time_resolution 
+                
                 
                 if angle < 0:
                     self.rover_speed = -self.rover_speed
                 else:
                     self.rover_speed = self.rover_speed
 
-                msg.linear.z = self.rover_speed
-                msg.angular.x = 0.0
+                msg.angular.z = self.rover_speed
+                msg.linear.x = 0.0
                 
 
-                for i in range(int(self.move_time)):
+                for i in range(int(self.pulses)):
                     self.publisher_vel.publish(msg)
-                    time.sleep(self.time_resolution)
+                    time.sleep(self.time_resolution*self.calibration)
                 self.robot_stop()
 
 

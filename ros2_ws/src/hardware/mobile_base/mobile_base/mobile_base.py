@@ -103,9 +103,9 @@ class MobileBaseNode(Node):
         #Physic parameters to calculate odometry and speeds
         self.diameter = 0.107
         self.radius = self.diameter / 2.0
-        self.width = 0.37 #Rover measure of left wheels to right wheels
-        self.height = 0.29 #Rover measure of center wheels to front wheels
-        self.ppr = 4400
+        self.width = 0.34 #Rover measure of left wheels to right wheels
+        self.height = 0.31 #Rover measure of center wheels to front wheels
+        self.ppr = 4450
        
         self.meters_per_tick = (math.pi * self.diameter) / self.ppr #For encoders
         self.servo_odometry_angles = [0,0,0,0]
