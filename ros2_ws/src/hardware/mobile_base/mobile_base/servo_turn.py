@@ -53,14 +53,14 @@ class ServosNode(Node):
 
         time.sleep(2)
 
-        #1- Revise la linea 142 del código, se encuentra en la función move_servos, realice el ejercicio propuesto para completar el código.
+        #1- Revise la linea 150 del código, se encuentra en la función move_servos, realice el ejercicio propuesto para completar el código.
 
         #2- Modifique la llamada a la función self.move_servos para imprimir el ángulo real de cada servo.
         #   La función move_servos recibe como primer argumento la velocidad lineal en m/s y como segundo argumento la velocidad angular en rad/s.
         #   Revise la información impresa en la terminal y compare los ángulos reales con los calculados en la clase, revise si la orientación es correcta.
 
 
-        self.move_servos(1.0,1.0)
+        self.move_servos(0.0,0.0)
 
 
 
@@ -70,7 +70,7 @@ class ServosNode(Node):
 
 
     def move_servos(self,linear, angular):
-
+        posicion_real = [0.0,0.0,0.0,0.0]
         if angular > 0.005 or angular < -0.005: 
             wheel_information = self.get_wheel_configuration (linear,angular)   
 
@@ -81,10 +81,10 @@ class ServosNode(Node):
         wheel_angles = self.radian_to_dynamixel (wheel_information[1])
             
 
-        self.goal_position[0] = wheel_angles[2]
-        self.goal_position[1] = wheel_angles[0]
-        self.goal_position[2] = wheel_angles[5]
-        self.goal_position[3] = wheel_angles[3]
+        self.goal_position[0] = wheel_angles[0]
+        self.goal_position[1] = wheel_angles[2]
+        self.goal_position[2] = wheel_angles[3]
+        self.goal_position[3] = wheel_angles[5]
 
         for c in range(NUM_SERVOS):
                 param = [DXL_LOBYTE(int(round(self.goal_position[c]))),DXL_HIBYTE(int(round(self.goal_position[c])))]
@@ -106,9 +106,16 @@ class ServosNode(Node):
             #Se imprime el valor que el servomotor lee como posición actual, se convierte a grados para una mejor interpretación.
             posicion, result, error = self.packet_handler.read2ByteTxRx(self.port_handler,self.DXL_ID[c],ADDR_PRESENT_POSITION)
             if result == COMM_SUCCESS:
-                posicion = (posicion - 2048) * (360/4096)
-                self.get_logger().info(f"Posición actual del servo {self.DXL_ID[c]}: {posicion}")
+                if c == 0:
+                    posicion_real[c] = (posicion - 2172) * (360/4096)
+                else:
+                    posicion_real[c] = (posicion - 2048) * (360/4096)
         self.port_handler.closePort()
+
+        print ("Ángulo llanta izquierda frontal:",posicion_real[0])
+        print ("Ángulo llanta izquierda trasera:",posicion_real[1])
+        print ("Ángulo llanta derecha frontal:",posicion_real[2])
+        print ("Ángulo llanta derecha trasera:",posicion_real[3])
 
 
 

@@ -41,6 +41,7 @@ setup(
             'state_machine1 = mobile_base.state_machine1:main',
             'state_machine2 = mobile_base.state_machine2:main',
             'servo_turn = mobile_base.servo_turn:main',
+            'diferential_base = mobile_base.diferential_base:main',
         ],
     },
 )

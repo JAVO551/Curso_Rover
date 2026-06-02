@@ -40,51 +40,58 @@ class ObjectiveMovementPWM(Node):
         #La función move_foward se encarga de mover el rover segun una distancia dada en metros.
         #La función move_turn se encarga de girar el rover en su propio eje segun el un ángulo dado en radianes.
 
-        #self.move_forward(0.0)
-        #self.move_turn(0.0)           
-        
+        self.move_forward(1.0)
+        self.move_turn(-1.5708)
+        self.move_forward(1.0)
+        self.move_turn(-1.5708)
+        self.move_forward(1.0)
+        self.move_turn(-1.5708)
+        self.move_forward(1.0)
+        self.move_turn(-1.5708)
         
 
     
     def move_forward (self, distance): #Función para mover el rover hacia adelante o atras.
-            msg = Twist()    
-            self.move_time = (abs(distance) / self.rover_speed)
-            
-            self.pulses= self.move_time/self.time_resolution 
-            
-            if distance < 0:
-                self.rover_speed = -self.rover_speed
-            else:
-                self.rover_speed = self.rover_speed
+        msg = Twist()    
+        self.move_time = abs(distance / self.rover_speed)
+        
+        self.pulses= self.move_time/self.time_resolution 
+        
+        if distance < 0:
+            self.rover_speed = -0.5
+        else:
+            self.rover_speed = 0.5
 
-            msg.linear.x = self.rover_speed
-            msg.angular.z = 0.0
-
-            for i in range(int(self.pulses)):
-                self.publisher_vel.publish(msg)
-                time.sleep(self.time_resolution*self.calibration)
-            self.robot_stop()
+        msg.linear.x = self.rover_speed
+        msg.angular.z = 0.0
+        i=0
+        for i in range(int(self.pulses)):
+            self.publisher_vel.publish(msg)
+            time.sleep(self.time_resolution*self.calibration)
+        self.robot_stop()
+        return
     
     def move_turn (self, angle): #Función para girar el rover en su propio eje.
-                msg = Twist() 
-                self.move_time = (abs(angle) / self.rover_speed) 
-                self.pulses= self.move_time/self.time_resolution 
-                self.get_logger().info(f"Tiempo de movimiento: {self.move_time}")
-                
-                
-                if angle < 0:
-                    self.rover_speed = -self.rover_speed
-                else:
-                    self.rover_speed = self.rover_speed
+        msg = Twist() 
+        self.move_time = abs(angle / self.rover_speed) 
+        self.pulses= self.move_time/self.time_resolution 
+        #self.get_logger().info(f"Tiempo de movimiento: {self.move_time}")
+        
+        
+        if angle < 0:
+            self.rover_speed = -0.5
+        else:
+            self.rover_speed = 0.5
 
-                msg.angular.z = self.rover_speed
-                msg.linear.x = 0.0
-                
+        msg.angular.z = self.rover_speed
+        msg.linear.x = 0.0
+        i=0
 
-                for i in range(int(self.pulses)):
-                    self.publisher_vel.publish(msg)
-                    time.sleep(self.time_resolution)
-                self.robot_stop()
+        for i in range(int(self.pulses)):
+            self.publisher_vel.publish(msg)
+            time.sleep(self.time_resolution*1.7)
+        self.robot_stop()
+        return
 
 
     def robot_stop(self): #Función para detener cualquier movimiento del rover.
@@ -92,6 +99,8 @@ class ObjectiveMovementPWM(Node):
         msg.linear.x = 0.0
         msg.angular.z = 0.0
         self.publisher_vel.publish(msg)
+        time.sleep(1)
+        return
 
         
 
